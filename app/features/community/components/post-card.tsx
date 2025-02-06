@@ -1,3 +1,4 @@
+import { DotIcon } from "lucide-react";
 import { Link } from "react-router";
 import {
   Avatar,
@@ -42,15 +43,13 @@ export default function PostCard({
             <div className="flex gap-2 text-sm leading-tight text-muted-foreground">
               <span>{author}</span>
               <span>{category}</span>
-              <span>·</span>
+              <DotIcon className="size-4" />
               <span>{postedAt}</span>
             </div>
           </div>
         </CardHeader>
         <CardFooter className="flex justify-end">
-          <Button variant="link" asChild>
-            <Link to="/community/postId">Reply &rarr;</Link>
-          </Button>
+          <Button variant="link">Reply &rarr;</Button>
         </CardFooter>
       </Card>
     </Link>
