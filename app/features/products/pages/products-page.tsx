@@ -1,3 +1,5 @@
-export default function ProductPage() {
-  return <div>product page</div>;
+import { redirect } from "react-router";
+
+export function loader() {
+  return redirect("/products/leaderboards");
 }
