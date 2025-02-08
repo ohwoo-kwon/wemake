@@ -77,7 +77,7 @@ export default function DailyLeaderboard({ loaderData }: Route.ComponentProps) {
         )}
       </div>
       <div className="space-y-5 w-full max-w-screen-md mx-auto">
-        {Array.from({ length: 10 }).map((_, idx) => (
+        {Array.from({ length: 4 }).map((_, idx) => (
           <ProductCard
             key={`productId-${idx}`}
             id={`productId-${idx}`}
