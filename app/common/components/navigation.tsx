@@ -178,19 +178,17 @@ export default function Navigation({
                                 "col-span-2 bg-primary/10 hover:bg-primary/20 focus:bg-primary/20",
                             ])}
                           >
-                            <NavigationMenuLink>
-                              <Link
-                                className="p-3 space-y-1 block  no-underline outline-none"
-                                to={item.to}
-                              >
-                                <span className="text-sm font-medium leading-none">
-                                  {item.name}
-                                </span>
-                                <p className="text-sm leading-snug text-muted-foreground">
-                                  {item.description}
-                                </p>
-                              </Link>
-                            </NavigationMenuLink>
+                            <Link
+                              className="p-3 space-y-1 block  no-underline outline-none"
+                              to={item.to}
+                            >
+                              <span className="text-sm font-medium leading-none">
+                                {item.name}
+                              </span>
+                              <p className="text-sm leading-snug text-muted-foreground">
+                                {item.description}
+                              </p>
+                            </Link>
                           </NavigationMenuItem>
                         ))}
                       </ul>
