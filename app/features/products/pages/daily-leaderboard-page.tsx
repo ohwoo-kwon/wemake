@@ -66,15 +66,17 @@ export default function DailyLeaderboard({ loaderData }: Route.ComponentProps) {
             &larr; {previousDay.toLocaleString(DateTime.DATE_SHORT)}
           </Link>
         </Button>
-        {!isToday && (
-          <Button variant="secondary" asChild>
-            <Link
-              to={`/products/leaderboards/daily/${nextDay.year}/${nextDay.month}/${nextDay.day}`}
-            >
-              {nextDay.toLocaleString(DateTime.DATE_SHORT)} &rarr;
-            </Link>
-          </Button>
-        )}
+        <Button variant="secondary" asChild>
+          <Link
+            to={`/products/leaderboards/daily/${nextDay.year}/${nextDay.month}/${nextDay.day}`}
+            className={isToday ? "pointer-events-none opacity-50" : ""}
+            onClick={(event) => {
+              if (isToday) event.preventDefault();
+            }}
+          >
+            {nextDay.toLocaleString(DateTime.DATE_SHORT)} &rarr;
+          </Link>
+        </Button>
       </div>
       <div className="space-y-5 w-full max-w-screen-md mx-auto">
         {Array.from({ length: 4 }).map((_, idx) => (
