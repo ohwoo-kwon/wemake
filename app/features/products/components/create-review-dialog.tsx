@@ -42,7 +42,7 @@ export default function CreateReviewDialog({}: CreateReviewDialogProps) {
                 key={star}
                 className="relative"
                 onMouseEnter={() => setHoveredStar(star)}
-                onMouseLeave={() => setHoveredStar(null)}
+                onMouseLeave={() => setHoveredStar(0)}
               >
                 <StarIcon
                   className="size-5 text-yellow-500"
