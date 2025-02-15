@@ -1,15 +1,15 @@
 import Hero from "~/common/components/hero";
-import type { Route } from "./+types/community-page";
 import { Form } from "react-router";
 import InputPair from "~/common/components/input-pair";
 import SelectPair from "~/common/components/select-pair";
 import { Button } from "~/common/components/ui/button";
+import type { Route } from "./+types/submit-post-page";
 
 export const meta: Route.MetaFunction = () => {
   return [{ title: "Community | wemake" }];
 };
 
-export default function CommunityPage() {
+export default function SubmitPostPage() {
   return (
     <div className="space-y-20">
       <Hero

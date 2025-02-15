@@ -1,5 +1,4 @@
 import Hero from "~/common/components/hero";
-import type { Route } from "./+types/submit-post-page";
 import { Form, Link, useSearchParams } from "react-router";
 import { Button } from "~/common/components/ui/button";
 import {
@@ -12,6 +11,7 @@ import { ChevronDownIcon } from "lucide-react";
 import { PERIOD_OPTIONS, SORT_OPTIONS } from "../constant";
 import { Input } from "~/common/components/ui/input";
 import PostCard from "../components/post-card";
+import type { Route } from "./+types/community-page";
 
 export const meta: Route.MetaFunction = () => {
   return [{ title: "Submit a post | wemake" }];
