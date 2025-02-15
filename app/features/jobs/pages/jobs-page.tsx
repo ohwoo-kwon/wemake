@@ -38,7 +38,7 @@ export default function JobsPage() {
             />
           ))}
         </div>
-        <div className="col-span-3 lg:col-span-2 flex flex-col gap-5">
+        <div className="sticky top-20 col-span-3 lg:col-span-2 flex flex-col gap-5">
           <div className="flex flex-col items-start gap-2.5">
             <h4 className="text-sm text-muted-foreground font-bold">Type</h4>
             <div className="flex flex-wrap gap-2">
