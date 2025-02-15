@@ -127,7 +127,7 @@ export default function PostPage() {
             <span>🚀 Launched 10 products</span>
           </div>
           <Button variant="outline" className="w-full">
-            follow
+            Follow
           </Button>
         </aside>
       </div>
