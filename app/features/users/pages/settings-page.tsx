@@ -46,6 +46,15 @@ export default function SettingsPage() {
               ]}
             />
             <InputPair
+              label="Headline"
+              description="An introduction to your profile."
+              placeholder="We are the most worthy family in the world."
+              id="headline"
+              name="headline"
+              required
+              textArea
+            />
+            <InputPair
               label="Bio"
               description="Your public bio."
               placeholder="Be the most worthy family in the world."
