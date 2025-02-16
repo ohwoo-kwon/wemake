@@ -33,7 +33,7 @@ export default function MessagePage() {
           </div>
         </CardHeader>
       </Card>
-      <div className="py-10 overflow-y-scroll flex flex-col justify-end h-full">
+      <div className="py-10 overflow-y-scroll flex flex-col justify-start h-full">
         {Array.from({ length: 20 }).map((_, index) => (
           <MessageBubble
             key={`message-bubble-${index}`}
