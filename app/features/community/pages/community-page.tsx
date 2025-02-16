@@ -108,7 +108,7 @@ export default function CommunityPage() {
           </div>
         </div>
         <aside className="col-span-2 space-y-5">
-          <span className="text-sm text-bold text-muted-foreground uppercase">
+          <span className="text-sm font-bold text-muted-foreground uppercase">
             Topics
           </span>
           <div className="flex flex-col gap-4 items-start">
