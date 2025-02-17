@@ -22,6 +22,13 @@
       "when": 1739768847102,
       "tag": "0002_hesitant_medusa",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1739769256911,
+      "tag": "0003_optimal_infant_terrible",
+      "breakpoints": true
     }
   ]
 }
