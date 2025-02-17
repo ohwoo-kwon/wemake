@@ -15,6 +15,13 @@
       "when": 1739767338826,
       "tag": "0001_lively_boom_boom",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1739768847102,
+      "tag": "0002_hesitant_medusa",
+      "breakpoints": true
     }
   ]
 }

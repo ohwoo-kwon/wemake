@@ -21,7 +21,7 @@ export const roles = pgEnum("role", [
 ]);
 
 export const profiles = pgTable("profiles", {
-  prfile_id: uuid()
+  profile_id: uuid()
     .primaryKey()
     .references(() => users.id, { onDelete: "cascade" }),
   avatar: text(),
@@ -37,10 +37,10 @@ export const profiles = pgTable("profiles", {
 });
 
 export const follows = pgTable("follows", {
-  follower_id: uuid().references(() => profiles.prfile_id, {
+  follower_id: uuid().references(() => profiles.profile_id, {
     onDelete: "cascade",
   }),
-  following_id: uuid().references(() => profiles.prfile_id, {
+  following_id: uuid().references(() => profiles.profile_id, {
     onDelete: "cascade",
   }),
   created_at: timestamp().notNull().defaultNow(),
