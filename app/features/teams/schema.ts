@@ -24,7 +24,7 @@ export const teams = pgTable(
     product_name: text().notNull(),
     team_size: integer().notNull(),
     equity_split: integer().notNull(),
-    prodcut_stage: productStage().notNull(),
+    product_stage: productStage().notNull(),
     roles: text().notNull(),
     product_description: text().notNull(),
     created_at: timestamp().notNull().defaultNow(),

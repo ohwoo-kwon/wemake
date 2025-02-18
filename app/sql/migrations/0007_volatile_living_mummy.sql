@@ -1,0 +1,1 @@
+ALTER TABLE "teams" RENAME COLUMN "prodcut_stage" TO "product_stage";
