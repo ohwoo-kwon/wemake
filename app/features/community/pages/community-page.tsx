@@ -1,5 +1,5 @@
 import Hero from "~/common/components/hero";
-import { Await, Form, Link, useSearchParams } from "react-router";
+import { Form, Link, useSearchParams } from "react-router";
 import { Button } from "~/common/components/ui/button";
 import {
   DropdownMenu,
@@ -13,20 +13,23 @@ import { Input } from "~/common/components/ui/input";
 import PostCard from "../components/post-card";
 import type { Route } from "./+types/community-page";
 import { getPosts, getTopics } from "../queries";
-import { Suspense } from "react";
 
 export const meta: Route.MetaFunction = () => {
   return [{ title: "Submit a post | wemake" }];
 };
 
 export const loader = async () => {
-  // await new Promise((resolve) => setTimeout(resolve, 10000));
   const [topics, posts] = await Promise.all([getTopics(), getPosts()]);
   return { topics, posts };
 };
 
+export const clientLoader = async ({
+  serverLoader,
+}: Route.ClientLoaderArgs) => {
+  const serverData = await serverLoader();
+};
+
 export default function CommunityPage({ loaderData }: Route.ComponentProps) {
-  const { topics, posts } = loaderData;
   const [searchParams, setSearchParams] = useSearchParams();
   const sorting = searchParams.get("sorting") || "newest";
   const period = searchParams.get("period") || "all";
@@ -101,7 +104,7 @@ export default function CommunityPage({ loaderData }: Route.ComponentProps) {
             </Button>
           </div>
           <div className="space-y-5">
-            {posts.map((post) => (
+            {loaderData.posts.map((post) => (
               <PostCard
                 key={post.post_id}
                 id={post.post_id}
@@ -121,7 +124,7 @@ export default function CommunityPage({ loaderData }: Route.ComponentProps) {
             Topics
           </span>
           <div className="flex flex-col gap-4 items-start">
-            {topics.map((topic) => (
+            {loaderData.topics.map((topic) => (
               <Button variant="link" asChild key={topic.slug} className="pl-0">
                 <Link
                   to={`/community?topic=${topic.slug}`}
