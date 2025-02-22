@@ -1,7 +1,24 @@
 import { createClient } from "@supabase/supabase-js";
-import type { Database } from "database.types";
+import type { MergeDeep, SetNonNullable, SetFieldType } from "type-fest";
+import type { Database as SupabaseDatabase } from "database.types";
 
-const client = createClient<Database>(
+type Database = {
+  public: {
+    Views: {
+      community_post_list_view: {
+        Row: SetFieldType<
+          SetNonNullable<
+            SupabaseDatabase["public"]["Views"]["community_post_list_view"]["Row"]
+          >,
+          "author_avatar",
+          string | null
+        >;
+      };
+    };
+  };
+};
+
+const client = createClient<MergeDeep<SupabaseDatabase, Database>>(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_ANON_KEY!
 );
