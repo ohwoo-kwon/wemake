@@ -55,7 +55,7 @@ export default function HomePage() {
         {Array.from({ length: 11 }).map((_, idx) => (
           <PostCard
             key={`postId-${idx}`}
-            id={`postId-${idx}`}
+            id={idx}
             title="What is the best productivity tool?"
             author="Nico"
             authorAvatarUrl="https://github.com/apple.png"

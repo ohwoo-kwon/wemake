@@ -21,9 +21,7 @@ export const meta: Route.MetaFunction = () => {
 
 export const loader = async () => {
   // await new Promise((resolve) => setTimeout(resolve, 10000));
-  // const [topics, posts] = await Promise.all([getTopics(), getPosts()]);
-  const topics = await getTopics();
-  const posts = getPosts();
+  const [topics, posts] = await Promise.all([getTopics(), getPosts()]);
   return { topics, posts };
 };
 
@@ -102,27 +100,21 @@ export default function CommunityPage({ loaderData }: Route.ComponentProps) {
               <Link to={`/community/submit`}>Create Discussion</Link>
             </Button>
           </div>
-          <Suspense fallback={<div>Loading...</div>}>
-            <Await resolve={posts}>
-              {(data) => (
-                <div className="space-y-5">
-                  {data.map((post) => (
-                    <PostCard
-                      key={post.post_id}
-                      id={post.post_id}
-                      title={post.title}
-                      author={post.author}
-                      authorAvatarUrl={post.author_avatar}
-                      category={post.topic}
-                      postedAt={post.created_at}
-                      expanded
-                      votesCount={post.upvotes}
-                    />
-                  ))}
-                </div>
-              )}
-            </Await>
-          </Suspense>
+          <div className="space-y-5">
+            {posts.map((post) => (
+              <PostCard
+                key={post.post_id}
+                id={post.post_id}
+                title={post.title}
+                author={post.author}
+                authorAvatarUrl={post.author_avatar}
+                category={post.topic}
+                postedAt={post.created_at}
+                expanded
+                votesCount={post.upvotes}
+              />
+            ))}
+          </div>
         </div>
         <aside className="col-span-2 space-y-5">
           <span className="text-sm font-bold text-muted-foreground uppercase">
