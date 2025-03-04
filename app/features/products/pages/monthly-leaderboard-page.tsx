@@ -6,6 +6,7 @@ import Hero from "~/common/components/hero";
 import ProductCard from "../components/product-card";
 import { Button } from "~/common/components/ui/button";
 import ProductPagination from "~/common/components/product-pagination";
+import { getProductByDateRange, getProductPagesByDateRange } from "../queries";
 
 const paramsSchema = z.object({
   year: z.coerce.number(),
@@ -29,7 +30,7 @@ export const meta: Route.MetaFunction = ({ params }) => {
   ];
 };
 
-export const loader = ({ params }: Route.LoaderArgs) => {
+export const loader = async ({ params, request }: Route.LoaderArgs) => {
   const { success, data: parsedData } = paramsSchema.safeParse(params);
 
   // params 유효성 검사
@@ -56,7 +57,20 @@ export const loader = ({ params }: Route.LoaderArgs) => {
       { status: 400 }
     );
   }
-  return { ...parsedData };
+
+  const url = new URL(request.url);
+
+  const products = await getProductByDateRange({
+    startDate: date.startOf("month"),
+    endDate: date.endOf("month"),
+    page: Number(url.searchParams.get("page")) || 1,
+  });
+
+  const totalPages = await getProductPagesByDateRange({
+    startDate: date.startOf("month"),
+    endDate: date.endOf("month"),
+  });
+  return { products, totalPages, ...parsedData };
 };
 
 export default function MonthlyLeaderboard({
@@ -101,18 +115,18 @@ export default function MonthlyLeaderboard({
         </Button>
       </div>
       <div className="space-y-5 w-full max-w-screen-md mx-auto">
-        {Array.from({ length: 4 }).map((_, idx) => (
+        {loaderData.products.map((product) => (
           <ProductCard
-            key={`productId-${idx}`}
-            id={`productId-${idx}`}
-            name="Product Name"
-            description="Product Description"
-            commentsCount={12}
-            viewsCount={41}
-            votesCount={120}
+            key={product.product_id}
+            id={product.product_id.toString()}
+            name={product.name}
+            description={product.description}
+            reviewsCount={product.reviews}
+            viewsCount={product.views}
+            votesCount={product.upvotes}
           />
         ))}
-        <ProductPagination totalPages={10} />
+        <ProductPagination totalPages={loaderData.totalPages} />
       </div>
     </div>
   );
