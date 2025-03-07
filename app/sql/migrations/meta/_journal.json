@@ -71,6 +71,20 @@
       "when": 1741088319529,
       "tag": "0009_slippery_venom",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1741387955100,
+      "tag": "0010_cheerful_cable",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1741388101959,
+      "tag": "0011_funny_anthem",
+      "breakpoints": true
     }
   ]
 }

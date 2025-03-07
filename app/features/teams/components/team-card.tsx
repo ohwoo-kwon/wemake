@@ -14,9 +14,9 @@ import {
 } from "~/common/components/ui/card";
 
 interface TeamCardProps {
-  id: string;
+  id: number;
   leaderUserName: string;
-  leaderAvatarUrl: string;
+  leaderAvatarUrl: string | null;
   positions: string[];
   projectDescription: string;
 }
@@ -29,8 +29,8 @@ export default function TeamCard({
   projectDescription,
 }: TeamCardProps) {
   return (
-    <Link to={`/teams/${id}`}>
-      <Card className="bg-transparent transition-colors hover:bg-card/50">
+    <Link to={`/teams/${id}`} className="block">
+      <Card className="bg-transparent transition-colors hover:bg-card/50 h-full flex flex-col justify-between">
         <CardHeader className="flex flex-row items-center">
           <CardTitle className="text-base leading-loose">
             <Badge
@@ -39,7 +39,7 @@ export default function TeamCard({
             >
               <span>@{leaderUserName}</span>
               <Avatar className="size-5">
-                <AvatarImage src={leaderAvatarUrl} />
+                {leaderAvatarUrl ? <AvatarImage src={leaderAvatarUrl} /> : null}
                 <AvatarFallback>N</AvatarFallback>
               </Avatar>
             </Badge>
