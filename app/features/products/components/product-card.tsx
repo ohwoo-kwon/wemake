@@ -10,7 +10,7 @@ import {
 } from "~/common/components/ui/card";
 
 interface ProductCardProps {
-  id: string;
+  id: number;
   name: string;
   description: string;
   reviewsCount: string;

@@ -1,6 +1,7 @@
 import Hero from "~/common/components/hero";
 import type { Route } from "./+types/categories-page";
 import CategoryCard from "../components/category-card";
+import { getCategories } from "../queries";
 
 export const meta = () => {
   return [
@@ -11,7 +12,12 @@ export const meta = () => {
   ];
 };
 
-export default function Categories() {
+export const loader = async () => {
+  const categories = await getCategories();
+  return { categories };
+};
+
+export default function Categories({ loaderData }: Route.ComponentProps) {
   return (
     <div className="space-y-10">
       <Hero
@@ -19,12 +25,12 @@ export default function Categories() {
         subtitle="Search for products by title or description"
       />
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-10">
-        {Array.from({ length: 10 }).map((_, index) => (
+        {loaderData.categories.map((category) => (
           <CategoryCard
-            key={`categoryId-${index}`}
-            id={`categoryId-${index}`}
-            name={`Category Name ${index}`}
-            description="Category Description"
+            key={category.category_id}
+            id={category.category_id}
+            name={category.name}
+            description={category.description}
           />
         ))}
       </div>
