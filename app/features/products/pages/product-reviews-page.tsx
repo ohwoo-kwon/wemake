@@ -2,26 +2,41 @@ import { Button } from "~/common/components/ui/button";
 import ReviewCard from "../components/review-card";
 import { Dialog, DialogTrigger } from "~/common/components/ui/dialog";
 import CreateReviewDialog from "../components/create-review-dialog";
+import { useOutletContext } from "react-router";
+import type { Route } from "./+types/product-reviews-page";
+import { getReviews } from "../queries";
 
-export default function ProductReviews() {
+export const meta: Route.MetaFunction = () => [
+  { title: "Product Reviews | wemake" },
+  { name: "description", content: "Read and write prodcut reviews" },
+];
+
+export const loader = async ({ params }: Route.LoaderArgs) => {
+  const reviews = await getReviews(params.productId);
+  return { reviews };
+};
+
+export default function ProductReviews({ loaderData }: Route.ComponentProps) {
+  const { review_count } = useOutletContext<{ review_count: string }>();
   return (
     <Dialog>
       <div className="space-y-10 max-w-xl">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold">10 Reviews</h2>
+          <h2 className="text-2xl font-bold">{review_count} Reviews</h2>
           <DialogTrigger>
             <Button variant="secondary">Write a review</Button>
           </DialogTrigger>
         </div>
         <div className="space-y-20">
-          {Array.from({ length: 10 }).map(() => (
+          {loaderData.reviews.map((review) => (
             <ReviewCard
-              username="Elon Musk"
-              handle="@username"
-              avatarUrl="https://github.com/facebook.png"
-              rating={4}
-              content="Lorem ipsum dolor sit, amet consectetur adipisicing elit. Maiores et dolorem excepturi veniam quam a quia, nemo cupiditate error accusamus possimus ducimus tempora aliquam! Eius aut nostrum minus a, veniam modi. Architecto vel asperiores sit dolorem non quia provident. Consequuntur pariatur ex commodi neque cupiditate dicta similique adipisci ipsum nihil enim eaque officiis nulla qui, animi in itaque iste inventore, dolorum, praesentium sapiente? Fuga consequuntur eaque, dolorem repellat necessitatibus magni quos iusto placeat laudantium? Voluptas, doloribus. Hic, earum! Deserunt corrupti hic ab. Laborum dolor pariatur dolorem necessitatibus eaque! Officia fuga quaerat eius quos illum harum voluptatem iure esse doloremque quasi?"
-              postedAt="10 days ago"
+              key={review.review_id}
+              username={review.user.name}
+              handle={review.user.username}
+              avatarUrl={review.user.avatar}
+              rating={review.rating}
+              content={review.review}
+              postedAt={review.created_at}
             />
           ))}
         </div>
