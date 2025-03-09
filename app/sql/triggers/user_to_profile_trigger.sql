@@ -1,4 +1,4 @@
-create function public.handle_new_user()
+create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
 security definer
@@ -8,13 +8,13 @@ begin
     if new.raw_app_meta_data is not null then
         if new.raw_app_meta_data ? 'provider' and new.raw_app_meta_data ->> 'provider' = 'email' then
             insert into public.profiles (profile_id, name, username, role)
-            values (new.id, 'Anonymous', 'mr.' || substr(md5(random()::text), 1, 8), 'developer');
+            values (new.id, new.raw_user_meta_data ->> 'name', new.raw_user_meta_data ->> 'username', 'developer');
         end if;
     end if;
     return new;
 end;
 $$;
 
-create trigger user_to_profile_trigger
+create or replace trigger user_to_profile_trigger
 after insert on auth.users
 for each row execute function public.handle_new_user();

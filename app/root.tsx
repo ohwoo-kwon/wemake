@@ -35,6 +35,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   const {
     data: { user },
   } = await client.auth.getUser();
+  console.log(user);
   return { user };
 };
 
