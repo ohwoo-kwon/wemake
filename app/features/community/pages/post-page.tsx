@@ -8,7 +8,7 @@ import {
 import type { Route } from "./+types/post-page";
 import { Form, Link } from "react-router";
 import { Button } from "~/common/components/ui/button";
-import { ChevronUpIcon, DotIcon, MessageCircleIcon } from "lucide-react";
+import { ChevronUpIcon, DotIcon } from "lucide-react";
 import { Textarea } from "~/common/components/ui/textarea";
 import {
   Avatar,
@@ -17,12 +17,19 @@ import {
 } from "~/common/components/ui/avatar";
 import { Badge } from "~/common/components/ui/badge";
 import Reply from "../components/reply";
+import { getPostById } from "../queries";
+import { DateTime } from "luxon";
 
 export const meta: Route.MetaFunction = () => {
   return [{ title: "Post | wemake" }];
 };
 
-export default function PostPage() {
+export const loader = async ({ params }: Route.LoaderArgs) => {
+  const post = await getPostById(params.postId);
+  return { post };
+};
+
+export default function PostPage({ loaderData }: Route.ComponentProps) {
   return (
     <div className="space-y-10">
       <Breadcrumb>
@@ -35,14 +42,16 @@ export default function PostPage() {
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link to={`/community?topic=productivity`}>Productivity</Link>
+              <Link to={`/community?topic=${loaderData.post.topic_slug}`}>
+                {loaderData.post.topic_name}
+              </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link to={`/community/postId`}>
-                What is the best productivity tool?
+              <Link to={`/community/${loaderData.post.post_id}`}>
+                {loaderData.post.title}
               </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -53,36 +62,30 @@ export default function PostPage() {
           <div className="flex w-full items-start gap-10">
             <Button variant="outline" className="flex flex-col h-14">
               <ChevronUpIcon className="size-4 shrink-0" />
-              <span>10</span>
+              <span>{loaderData.post.upvotes}</span>
             </Button>
             <div className="space-y-20">
               <div className="space-y-2">
-                <h2 className="text-3xl font-bold">
-                  What is the best productivity tool?
-                </h2>
+                <h2 className="text-3xl font-bold">{loaderData.post.title}</h2>
                 <div className="flex items-center text-sm text-muted-foreground">
-                  <span>@nico</span>
+                  <span>{loaderData.post.author_name}</span>
                   <DotIcon className="size-5" />
-                  <span>12 hours ago</span>
+                  <span>
+                    {DateTime.fromISO(loaderData.post.created_at).toRelative()}
+                  </span>
                   <DotIcon className="size-5" />
-                  <span>10 replies</span>
+                  <span>{loaderData.post.replies} replies</span>
                 </div>
                 <p className="text-muted-foreground lg:w-2/3">
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quo
-                  laborum omnis quas enim, numquam laudantium similique eveniet
-                  ex aut consequatur voluptates perferendis consequuntur eaque,
-                  facere labore repellat ipsam iste quae! Quibusdam odio eius
-                  accusantium maxime atque est molestiae recusandae culpa beatae
-                  libero pariatur obcaecati, repudiandae saepe iure voluptatum
-                  laudantium minus consectetur veritatis nemo, et enim omnis
-                  modi tempore sapiente? Eveniet, et! Inventore magni dolorum
-                  quidem cumque ullam, laudantium in neque!
+                  {loaderData.post.content}
                 </p>
               </div>
               <Form className="flex items-start gap-5 lg:w-2/3">
                 <Avatar className="size-14">
                   <AvatarFallback>N</AvatarFallback>
-                  <AvatarImage src="https://github.com/microsoft.png" />
+                  {loaderData.post.author_avatar ? (
+                    <AvatarImage src={loaderData.post.author_avatar} />
+                  ) : null}
                 </Avatar>
                 <div className="flex flex-col gap-5 items-end w-full">
                   <Textarea
@@ -94,15 +97,14 @@ export default function PostPage() {
                 </div>
               </Form>
               <div className="space-y-2">
-                <h4 className="font-semibold">10 Replies</h4>
+                <h4 className="font-semibold">
+                  {loaderData.post.replies} Replies
+                </h4>
                 <div className="flex flex-col gap-5">
                   <Reply
-                    username="Microsoft"
-                    avatarUrl="https://github.com/microsoft.png"
-                    content="Lorem ipsum dolor, sit amet consectetur adipisicing elit. Est eveniet,
-          quisquam officia cupiditate adipisci mollitia consequuntur iure
-          dolorum, placeat ullam error, accusantium sed culpa ad animi? Aut
-          iusto adipisci facere."
+                    username={loaderData.post.author_name}
+                    avatarUrl=""
+                    content={loaderData.post.content}
                     timestamp="12 hours ago"
                     topLevel
                   />
@@ -115,16 +117,25 @@ export default function PostPage() {
           <div className="flex gap-5">
             <Avatar className="size-14">
               <AvatarFallback>N</AvatarFallback>
-              <AvatarImage src="https://github.com/microsoft.png" />
+              {loaderData.post.author_avatar ? (
+                <AvatarImage src={loaderData.post.author_avatar} />
+              ) : null}
             </Avatar>
-            <div className="flex flex-col">
-              <h4 className="text-lg font-medium">Microsoft</h4>
-              <Badge variant="secondary">Entrepreneur</Badge>
+            <div className="flex flex-col items-start">
+              <h4 className="text-lg font-medium">
+                {loaderData.post.author_name}
+              </h4>
+              <Badge variant="secondary" className="capitalize">
+                {loaderData.post.author_role}
+              </Badge>
             </div>
           </div>
           <div className="gap-2 text-sm flex flex-col">
-            <span>🎂 Joined 3 months ago</span>
-            <span>🚀 Launched 10 products</span>
+            <span>
+              🎂 Joined{" "}
+              {DateTime.fromISO(loaderData.post.author_created_at).toRelative()}
+            </span>
+            <span>🚀 Launched {loaderData.post.products} products</span>
           </div>
           <Button variant="outline" className="w-full">
             Follow

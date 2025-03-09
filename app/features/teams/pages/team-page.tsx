@@ -15,29 +15,35 @@ import {
   CardHeader,
   CardTitle,
 } from "~/common/components/ui/card";
+import { getTeamById } from "../queries";
 
 export const meta: Route.MetaFunction = () => {
   return [{ title: "Team | wemake" }];
 };
 
-export default function TeamPage() {
+export const loader = async ({ params }: Route.LoaderArgs) => {
+  const team = await getTeamById(params.teamId);
+  return { team };
+};
+
+export default function TeamPage({ loaderData }: Route.ComponentProps) {
   return (
     <div className="space-y-20">
       <Hero title="Join microsoft's team" />
       <div className="grid grid-cols-6 gap-40 items-start">
         <div className="col-span-4 grid grid-cols-4 gap-5">
           {[
-            { title: "Product name", value: "Doggy Social" },
-            { title: "Stage", value: "MVP" },
-            { title: "Team size", value: 2 },
-            { title: "Available equity", value: 0 },
+            { title: "Product name", value: loaderData.team.product_name },
+            { title: "Stage", value: loaderData.team.product_stage },
+            { title: "Team size", value: loaderData.team.team_size },
+            { title: "Available equity", value: loaderData.team.equity_split },
           ].map((item) => (
             <Card key={item.title}>
               <CardHeader>
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   {item.title}
                 </CardTitle>
-                <CardContent className="p-0 font-bold text-2xl">
+                <CardContent className="p-0 font-bold text-2xl capitalize">
                   <p>{item.value}</p>
                 </CardContent>
               </CardHeader>
@@ -50,12 +56,7 @@ export default function TeamPage() {
               </CardTitle>
               <CardContent className="p-0 font-bold text-2xl">
                 <ul className="text-lg list-disc list-inside">
-                  {[
-                    "React Developer",
-                    "Backend Developer",
-                    "Product Manager",
-                    "UI/UX Designer",
-                  ].map((item) => (
+                  {loaderData.team.roles.split(",").map((item) => (
                     <li key={item}> {item} </li>
                   ))}
                 </ul>
@@ -68,9 +69,7 @@ export default function TeamPage() {
                 Idea description
               </CardTitle>
               <CardContent className="p-0 font-medium text-xl">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Ut
-                porro sint facilis sed harum reprehenderit blanditiis ratione
-                suscipit molestias! Aut.
+                {loaderData.team.product_description}
               </CardContent>
             </CardHeader>
           </Card>
@@ -79,11 +78,17 @@ export default function TeamPage() {
           <div className="flex gap-5">
             <Avatar className="size-14">
               <AvatarFallback>N</AvatarFallback>
-              <AvatarImage src="https://github.com/microsoft.png" />
+              {loaderData.team.team_leader.avatar ? (
+                <AvatarImage src={loaderData.team.team_leader.avatar} />
+              ) : null}
             </Avatar>
             <div className="flex flex-col">
-              <h4 className="text-lg font-medium">Microsoft</h4>
-              <Badge variant="secondary">Entrepreneur</Badge>
+              <h4 className="text-lg font-medium">
+                {loaderData.team.team_leader.name}
+              </h4>
+              <Badge variant="secondary" className="capitalize">
+                {loaderData.team.team_leader.role}
+              </Badge>
             </div>
           </div>
           <Form className="space-y-5">
