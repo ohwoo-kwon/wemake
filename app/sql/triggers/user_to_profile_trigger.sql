@@ -10,6 +10,10 @@ begin
             insert into public.profiles (profile_id, name, username, role)
             values (new.id, new.raw_user_meta_data ->> 'name', new.raw_user_meta_data ->> 'username', 'developer');
         end if;
+        if new.raw_app_meta_data ? 'provider' and new.raw_app_meta_data ->> 'provider' = 'kakao' then
+            insert into public.profiles (profile_id, name, username, avatar, role)
+            values (new.id, new.raw_user_meta_data ->> 'name', new.raw_user_meta_data ->> 'user_name', new.raw_user_meta_data ->> 'avatar_url', 'developer');
+        end if;
     end if;
     return new;
 end;
