@@ -230,7 +230,9 @@ export default function Navigation({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Avatar>
-                {avatar ? <AvatarImage src={avatar} /> : null}
+                {avatar ? (
+                  <AvatarImage className="object-cover" src={avatar} />
+                ) : null}
                 <AvatarFallback>{name?.charAt(0)}</AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
