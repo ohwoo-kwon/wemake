@@ -1,30 +1,39 @@
-import { Form, Link, useNavigation } from "react-router";
+import { Form, Link, redirect, useNavigation } from "react-router";
 import InputPair from "~/common/components/input-pair";
 import { Button } from "~/common/components/ui/button";
 import type { Route } from "./+types/login-page";
 import AuthButtons from "../components/auth-buttons";
 import { makeSSRClient } from "~/supa-client";
 import { LoaderCircle } from "lucide-react";
+import { z } from "zod";
 
 export const meta: Route.MetaFunction = () => {
   return [{ title: "Login | wemake" }];
 };
 
+const formDataSchema = z.object({
+  email: z.string().email(),
+  password: z.string(),
+});
+
 export const action = async ({ request }: Route.ActionArgs) => {
   const formData = await request.formData();
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-  if (!email || !password) return;
+  const { success, data, error } = formDataSchema.safeParse(
+    Object.fromEntries(formData)
+  );
+  if (!success)
+    return { loginError: null, formErrors: error.flatten().fieldErrors };
+  const { email, password } = data;
   const { client, headers } = makeSSRClient(request);
-  const { data, error } = await client.auth.signInWithPassword({
+  const { error: loginError } = await client.auth.signInWithPassword({
     email,
     password,
   });
-  if (error) throw error;
-  headers.getSetCookie;
+  if (loginError) return { loginError: loginError.message, formErrors: null };
+  return redirect("/", { headers });
 };
 
-export default function LoginPage() {
+export default function LoginPage({ actionData }: Route.ComponentProps) {
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
   return (
@@ -60,6 +69,19 @@ export default function LoginPage() {
               "Log in"
             )}
           </Button>
+          {actionData && "loginError" in actionData && (
+            <p className="text-sm text-red-500">{actionData.loginError}</p>
+          )}
+          {actionData && "formErrors" in actionData && (
+            <p className="text-sm text-red-500">
+              {actionData.formErrors?.email?.join(", ")}
+            </p>
+          )}
+          {actionData && "formErrors" in actionData && (
+            <p className="text-sm text-red-500">
+              {actionData.formErrors?.password?.join(", ")}
+            </p>
+          )}
         </Form>
         <AuthButtons />
       </div>
