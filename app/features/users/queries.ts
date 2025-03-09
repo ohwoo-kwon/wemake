@@ -31,3 +31,12 @@ export const getUserProducts = async (username: string) => {
   if (error) throw error;
   return data;
 };
+
+export const getUserPosts = async (username: string) => {
+  const { data, error } = await client
+    .from("community_post_list_view")
+    .select("*")
+    .eq("author_username", username);
+  if (error) throw error;
+  return data;
+};
