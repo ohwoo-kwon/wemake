@@ -19,14 +19,16 @@ import { Badge } from "~/common/components/ui/badge";
 import Reply from "../components/reply";
 import { getPostById, getReplies } from "../queries";
 import { DateTime } from "luxon";
+import { makeSSRClient } from "~/supa-client";
 
 export const meta: Route.MetaFunction = () => {
   return [{ title: "Post | wemake" }];
 };
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
-  const post = await getPostById(params.postId);
-  const replies = await getReplies(params.postId);
+export const loader = async ({ params, request }: Route.LoaderArgs) => {
+  const { client, headers } = makeSSRClient(request);
+  const post = await getPostById(client, { postId: params.postId });
+  const replies = await getReplies(client, { postId: params.postId });
   return { post, replies };
 };
 
@@ -105,7 +107,9 @@ export default function PostPage({ loaderData }: Route.ComponentProps) {
                   {loaderData.replies.map((reply) => (
                     <Reply
                       key={reply.post_reply_id}
+                      //@ts-ignore
                       username={reply.user!.name}
+                      //@ts-ignore
                       avatarUrl={reply.user!.avatar}
                       content={reply.reply}
                       timestamp={reply.created_at}

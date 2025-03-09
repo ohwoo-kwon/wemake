@@ -7,6 +7,7 @@ import { data, useSearchParams } from "react-router";
 import { cn } from "~/lib/utils";
 import { getJobs } from "../queries";
 import { z } from "zod";
+import { makeSSRClient } from "~/supa-client";
 
 export const meta: Route.MetaFunction = () => [
   { title: "Jobs | wemake" },
@@ -24,6 +25,7 @@ const searchParamsSchema = z.object({
 });
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
+  const { client, headers } = makeSSRClient(request);
   const url = new URL(request.url);
   const { success, data: parsedData } = searchParamsSchema.safeParse(
     Object.fromEntries(url.searchParams)
@@ -34,7 +36,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
       { status: 400 }
     );
   }
-  const jobs = await getJobs({
+  const jobs = await getJobs(client, {
     limit: 11,
     type: parsedData.type,
     location: parsedData.location,

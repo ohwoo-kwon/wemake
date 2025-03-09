@@ -16,13 +16,15 @@ import {
   CardTitle,
 } from "~/common/components/ui/card";
 import { getTeamById } from "../queries";
+import { makeSSRClient } from "~/supa-client";
 
 export const meta: Route.MetaFunction = () => {
   return [{ title: "Team | wemake" }];
 };
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
-  const team = await getTeamById(params.teamId);
+export const loader = async ({ params, request }: Route.LoaderArgs) => {
+  const { client, headers } = makeSSRClient(request);
+  const team = await getTeamById(client, { teamId: params.teamId });
   return { team };
 };
 
@@ -56,6 +58,7 @@ export default function TeamPage({ loaderData }: Route.ComponentProps) {
               </CardTitle>
               <CardContent className="p-0 font-bold text-2xl">
                 <ul className="text-lg list-disc list-inside">
+                  {/* @ts-ignore */}
                   {loaderData.team.roles.split(",").map((item) => (
                     <li key={item}> {item} </li>
                   ))}

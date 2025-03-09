@@ -4,6 +4,7 @@ import type { Route } from "./+types/idea-page";
 import { Button } from "~/common/components/ui/button";
 import { getGptIdea } from "../queries";
 import { DateTime } from "luxon";
+import { makeSSRClient } from "~/supa-client";
 
 export const meta = ({
   data: {
@@ -16,8 +17,9 @@ export const meta = ({
   ];
 };
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
-  const idea = await getGptIdea(params.ideaId);
+export const loader = async ({ params, request }: Route.LoaderArgs) => {
+  const { client, headers } = makeSSRClient(request);
+  const idea = await getGptIdea(client, { ideaId: params.ideaId });
   return { idea };
 };
 

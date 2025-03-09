@@ -5,6 +5,7 @@ import { Button } from "~/common/components/ui/button";
 import { Link } from "react-router";
 import { getProductByDateRange } from "../queries";
 import { DateTime } from "luxon";
+import { makeSSRClient } from "~/supa-client";
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -13,28 +14,25 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-export const loader = async () => {
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  const { client, headers } = makeSSRClient(request);
   const [dailyProducts, weeklyProducts, monthlyProducts, yearlyProducts] =
     await Promise.all([
-      getProductByDateRange({
+      getProductByDateRange(client, {
         startDate: DateTime.now().startOf("day"),
         endDate: DateTime.now().endOf("day"),
-        limit: 7,
       }),
-      getProductByDateRange({
+      getProductByDateRange(client, {
         startDate: DateTime.now().startOf("week"),
         endDate: DateTime.now().endOf("week"),
-        limit: 7,
       }),
-      getProductByDateRange({
+      getProductByDateRange(client, {
         startDate: DateTime.now().startOf("month"),
         endDate: DateTime.now().endOf("month"),
-        limit: 7,
       }),
-      getProductByDateRange({
+      getProductByDateRange(client, {
         startDate: DateTime.now().startOf("year"),
         endDate: DateTime.now().endOf("year"),
-        limit: 7,
       }),
     ]);
   return { dailyProducts, weeklyProducts, monthlyProducts, yearlyProducts };

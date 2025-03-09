@@ -5,14 +5,16 @@ import CreateReviewDialog from "../components/create-review-dialog";
 import { useOutletContext } from "react-router";
 import type { Route } from "./+types/product-reviews-page";
 import { getReviews } from "../queries";
+import { makeSSRClient } from "~/supa-client";
 
 export const meta: Route.MetaFunction = () => [
   { title: "Product Reviews | wemake" },
   { name: "description", content: "Read and write prodcut reviews" },
 ];
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
-  const reviews = await getReviews(params.productId);
+export const loader = async ({ params, request }: Route.LoaderArgs) => {
+  const { client, headers } = makeSSRClient(request);
+  const reviews = await getReviews(client, { productId: params.productId });
   return { reviews };
 };
 
@@ -31,8 +33,11 @@ export default function ProductReviews({ loaderData }: Route.ComponentProps) {
           {loaderData.reviews.map((review) => (
             <ReviewCard
               key={review.review_id}
+              // @ts-ignore
               username={review.user.name}
+              // @ts-ignore
               handle={review.user.username}
+              // @ts-ignore
               avatarUrl={review.user.avatar}
               rating={review.rating}
               content={review.review}

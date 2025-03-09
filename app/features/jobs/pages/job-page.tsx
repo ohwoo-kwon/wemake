@@ -4,9 +4,11 @@ import { Button } from "~/common/components/ui/button";
 import type { Route } from "./+types/job-page";
 import { getJobById } from "../queries";
 import { DateTime } from "luxon";
+import { makeSSRClient } from "~/supa-client";
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
-  const job = await getJobById(params.jobId);
+export const loader = async ({ params, request }: Route.LoaderArgs) => {
+  const { client, headers } = makeSSRClient(request);
+  const job = await getJobById(client, { jobId: params.jobId });
   return { job };
 };
 
@@ -36,6 +38,7 @@ export default function JobPage({ loaderData }: Route.ComponentProps) {
           <div className="space-y-2.5">
             <h4 className="text-2xl font-bold">Responsibilities</h4>
             <ul className="text-lg list-disc list-inside">
+              {/* @ts-ignore */}
               {loaderData.job.responsibilities.split(",").map((item) => (
                 <li key={item}>{item}</li>
               ))}
@@ -44,6 +47,7 @@ export default function JobPage({ loaderData }: Route.ComponentProps) {
           <div className="space-y-2.5">
             <h4 className="text-2xl font-bold">Qualifications</h4>
             <ul className="text-lg list-disc list-inside">
+              {/* @ts-ignore */}
               {loaderData.job.qualifications.split(",").map((item) => (
                 <li key={item}>{item}</li>
               ))}
@@ -52,6 +56,7 @@ export default function JobPage({ loaderData }: Route.ComponentProps) {
           <div className="space-y-2.5">
             <h4 className="text-2xl font-bold">Benefits</h4>
             <ul className="text-lg list-disc list-inside">
+              {/* @ts-ignore */}
               {loaderData.job.benefits.split(",").map((item) => (
                 <li key={item}>{item}</li>
               ))}
@@ -60,6 +65,7 @@ export default function JobPage({ loaderData }: Route.ComponentProps) {
           <div className="space-y-2.5">
             <h4 className="text-2xl font-bold">Skills</h4>
             <ul className="text-lg list-disc list-inside">
+              {/* @ts-ignore */}
               {loaderData.job.skills.split(",").map((item) => (
                 <li key={item}>{item}</li>
               ))}
