@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { productListSelect } from "../products/queries";
 import type { Database } from "~/supa-client";
+import { redirect } from "react-router";
 
 export const getUserProfile = async (
   client: SupabaseClient<Database>,
@@ -69,4 +70,12 @@ export const getUserPosts = async (
     .eq("author_username", username);
   if (error) throw error;
   return data;
+};
+
+export const getLoggedInUserId = async (client: SupabaseClient<Database>) => {
+  const { data, error } = await client.auth.getUser();
+  if (error || data.user === null) {
+    throw redirect("/auth/login");
+  }
+  return data.user.id;
 };
