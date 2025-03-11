@@ -1,20 +1,57 @@
 import Hero from "~/common/components/hero";
 import type { Route } from "./+types/submit-team-page";
-import { Form } from "react-router";
+import { Form, redirect } from "react-router";
 import { Button } from "~/common/components/ui/button";
 import InputPair from "~/common/components/input-pair";
 import SelectPair from "~/common/components/select-pair";
 import { PRODUCT_STAGE } from "../constants";
+import { makeSSRClient } from "~/supa-client";
+import { getLoggedInUserId } from "~/features/users/queries";
+import { z } from "zod";
+import { createTeam } from "../mutation";
 
 export const meta: Route.MetaFunction = () => {
   return [{ title: "Submit Team | wemake" }];
 };
 
-export default function SubmitTeamPage() {
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  await getLoggedInUserId(client);
+};
+
+export const formSchema = z.object({
+  name: z.string().min(1).max(20),
+  stage: z.string(),
+  size: z.coerce.number().min(1).max(100),
+  equity: z.coerce.number().min(1).max(100),
+  roles: z.string(),
+  description: z.string().min(1).max(200),
+});
+
+export const action = async ({ request }: Route.ActionArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getLoggedInUserId(client);
+  const formData = await request.formData();
+  const { success, data, error } = formSchema.safeParse(
+    Object.fromEntries(formData)
+  );
+  if (!success) {
+    return { fieldErrors: error.flatten().fieldErrors };
+  }
+  const { team_id } = await createTeam(client, userId, {
+    ...data,
+  });
+  return redirect(`/teams/${team_id}`);
+};
+
+export default function SubmitTeamPage({ actionData }: Route.ComponentProps) {
   return (
     <div className="space-y-20">
       <Hero title="Create Team" subtitle="Create a team to find a team mate." />
-      <Form className="max-w-screen-2xl mx-auto flex flex-col items-center gap-10">
+      <Form
+        className="max-w-screen-2xl mx-auto flex flex-col items-center gap-10"
+        method="POST"
+      >
         <div className="grid grid-cols-3 gap-10 w-full">
           <InputPair
             label="What is the name of your product?"
@@ -26,6 +63,9 @@ export default function SubmitTeamPage() {
             id="name"
             required
           />
+          {actionData && "fieldErrors" in actionData && (
+            <p className="text-red-500">{actionData.fieldErrors.name}</p>
+          )}
           <SelectPair
             label="What is the stage of your product?"
             description="Select the stage of your product"
@@ -34,6 +74,9 @@ export default function SubmitTeamPage() {
             placeholder="Select the stage of your product"
             options={PRODUCT_STAGE}
           />
+          {actionData && "fieldErrors" in actionData && (
+            <p className="text-red-500">{actionData.fieldErrors.stage}</p>
+          )}
           <InputPair
             label="What is the size of your team?"
             description="(1 - 100)"
@@ -44,6 +87,9 @@ export default function SubmitTeamPage() {
             id="size"
             required
           />
+          {actionData && "fieldErrors" in actionData && (
+            <p className="text-red-500">{actionData.fieldErrors.size}</p>
+          )}
           <InputPair
             label="How much equity are you willing to give?"
             description="(each)"
@@ -54,6 +100,9 @@ export default function SubmitTeamPage() {
             id="equity"
             required
           />
+          {actionData && "fieldErrors" in actionData && (
+            <p className="text-red-500">{actionData.fieldErrors.equity}</p>
+          )}
           <InputPair
             label="What roles are you looking for?"
             placeholder="i.e React Developer, Backend Developer, Product Manager"
@@ -63,6 +112,9 @@ export default function SubmitTeamPage() {
             id="roles"
             required
           />
+          {actionData && "fieldErrors" in actionData && (
+            <p className="text-red-500">{actionData.fieldErrors.roles}</p>
+          )}
           <InputPair
             label="What is the description of your product?"
             placeholder="i.e We are building a new social media platform."
@@ -74,6 +126,9 @@ export default function SubmitTeamPage() {
             required
             textArea
           />
+          {actionData && "fieldErrors" in actionData && (
+            <p className="text-red-500">{actionData.fieldErrors.description}</p>
+          )}
         </div>
         <Button type="submit" className="w-full max-w-sm" size="lg">
           Create team
