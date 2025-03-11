@@ -38,6 +38,7 @@ export const loader = async ({ params, request }: Route.LoaderArgs) => {
 
 const formSchema = z.object({
   reply: z.string().min(1),
+  topLevelId: z.coerce.number().optional(),
 });
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
@@ -48,8 +49,13 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
     Object.fromEntries(formData)
   );
   if (!success) return { formErrors: error.flatten().fieldErrors };
-  const { reply } = data;
-  await createReply(client, { postId: params.postId, reply, userId });
+  const { reply, topLevelId } = data;
+  await createReply(client, {
+    postId: params.postId,
+    reply,
+    userId,
+    topLevelId,
+  });
   return { ok: true };
 };
 
@@ -149,7 +155,9 @@ export default function PostPage({
                     <Reply
                       key={reply.post_reply_id}
                       //@ts-ignore
-                      username={reply.user!.name}
+                      name={reply.user.name}
+                      //@ts-ignore
+                      username={reply.user.username}
                       //@ts-ignore
                       avatarUrl={reply.user!.avatar}
                       content={reply.reply}
@@ -157,6 +165,7 @@ export default function PostPage({
                       //@ts-ignore
                       replies={reply.post_replies}
                       topLevel
+                      topLevelId={reply.post_reply_id}
                     />
                   ))}
                 </div>
