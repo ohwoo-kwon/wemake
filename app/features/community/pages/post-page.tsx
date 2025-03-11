@@ -6,7 +6,7 @@ import {
   BreadcrumbSeparator,
 } from "~/common/components/ui/breadcrumb";
 import type { Route } from "./+types/post-page";
-import { Form, Link } from "react-router";
+import { Form, Link, useOutletContext } from "react-router";
 import { Button } from "~/common/components/ui/button";
 import { ChevronUpIcon, DotIcon } from "lucide-react";
 import { Textarea } from "~/common/components/ui/textarea";
@@ -20,6 +20,10 @@ import Reply from "../components/reply";
 import { getPostById, getReplies } from "../queries";
 import { DateTime } from "luxon";
 import { makeSSRClient } from "~/supa-client";
+import { getLoggedInUserId } from "~/features/users/queries";
+import { z } from "zod";
+import { createReply } from "../mutation";
+import { useEffect, useRef } from "react";
 
 export const meta: Route.MetaFunction = () => {
   return [{ title: "Post | wemake" }];
@@ -32,7 +36,37 @@ export const loader = async ({ params, request }: Route.LoaderArgs) => {
   return { post, replies };
 };
 
-export default function PostPage({ loaderData }: Route.ComponentProps) {
+const formSchema = z.object({
+  reply: z.string().min(1),
+});
+
+export const action = async ({ request, params }: Route.ActionArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getLoggedInUserId(client);
+  const formData = await request.formData();
+  const { success, error, data } = formSchema.safeParse(
+    Object.fromEntries(formData)
+  );
+  if (!success) return { formErrors: error.flatten().fieldErrors };
+  const { reply } = data;
+  await createReply(client, { postId: params.postId, reply, userId });
+  return { ok: true };
+};
+
+export default function PostPage({
+  loaderData,
+  actionData,
+}: Route.ComponentProps) {
+  const { isLoggedIn, name, avatar } = useOutletContext<{
+    isLoggedIn: boolean;
+    name?: string;
+    username?: string;
+    avatar?: string;
+  }>();
+  const formRef = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    if (actionData?.ok) formRef.current?.reset();
+  }, [actionData?.ok]);
   return (
     <div className="space-y-10">
       <Breadcrumb>
@@ -83,22 +117,29 @@ export default function PostPage({ loaderData }: Route.ComponentProps) {
                   {loaderData.post.content}
                 </p>
               </div>
-              <Form className="flex items-start gap-5 lg:w-2/3">
-                <Avatar className="size-14">
-                  <AvatarFallback>N</AvatarFallback>
-                  {loaderData.post.author_avatar ? (
-                    <AvatarImage src={loaderData.post.author_avatar} />
-                  ) : null}
-                </Avatar>
-                <div className="flex flex-col gap-5 items-end w-full">
-                  <Textarea
-                    placeholder="Write a reply"
-                    className="w-full resize-none"
-                    rows={10}
-                  />
-                  <Button type="submit">Reply</Button>
-                </div>
-              </Form>
+              {isLoggedIn ? (
+                <Form
+                  ref={formRef}
+                  className="flex items-start gap-5 lg:w-2/3"
+                  method="POST"
+                >
+                  <Avatar className="size-14">
+                    <AvatarFallback>{name?.[0]}</AvatarFallback>
+                    {loaderData.post.author_avatar ? (
+                      <AvatarImage src={avatar} />
+                    ) : null}
+                  </Avatar>
+                  <div className="flex flex-col gap-5 items-end w-full">
+                    <Textarea
+                      name="reply"
+                      placeholder="Write a reply"
+                      className="w-full resize-none"
+                      rows={10}
+                    />
+                    <Button type="submit">Reply</Button>
+                  </div>
+                </Form>
+              ) : null}
               <div className="space-y-2">
                 <h4 className="font-semibold">
                   {loaderData.post.replies} Replies
