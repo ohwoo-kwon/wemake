@@ -4,7 +4,7 @@ CREATE TABLE "teams" (
 	"product_name" text NOT NULL,
 	"team_size" integer NOT NULL,
 	"equity_split" integer NOT NULL,
-	"prodcut_stage" "product_stage" NOT NULL,
+	"product_stage" "product_stage" NOT NULL,
 	"roles" text NOT NULL,
 	"product_description" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,

@@ -11,7 +11,7 @@ export const loader = async ({ params, request }: Route.LoaderArgs) => {
     .single();
   if (data) {
     await client.rpc("track_event", {
-      event_type: "prodcut_visit",
+      event_type: "product_visit",
       event_data: {
         product_id: params.productId,
       },

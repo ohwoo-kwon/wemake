@@ -526,9 +526,9 @@ export type Database = {
           content: string
           created_at: string
           post_id: number
-          profile_id: string | null
+          profile_id: string
           title: string
-          topic_id: number | null
+          topic_id: number
           updated_at: string
           upvotes: number | null
         }
@@ -536,9 +536,9 @@ export type Database = {
           content: string
           created_at?: string
           post_id?: never
-          profile_id?: string | null
+          profile_id: string
           title: string
-          topic_id?: number | null
+          topic_id: number
           updated_at?: string
           upvotes?: number | null
         }
@@ -546,9 +546,9 @@ export type Database = {
           content?: string
           created_at?: string
           post_id?: never
-          profile_id?: string | null
+          profile_id?: string
           title?: string
-          topic_id?: number | null
+          topic_id?: number
           updated_at?: string
           upvotes?: number | null
         }
@@ -915,6 +915,16 @@ export type Database = {
           month: string
         }[]
       }
+      get_product_stats: {
+        Args: {
+          product_id: string
+        }
+        Returns: {
+          product_views: number
+          product_visits: number
+          month: string
+        }[]
+      }
       track_event: {
         Args: {
           event_type: Database["public"]["Enums"]["event_type"]
@@ -924,7 +934,7 @@ export type Database = {
       }
     }
     Enums: {
-      event_type: "product_view" | "prodcut_visit" | "profile_view"
+      event_type: "product_view" | "product_visit" | "profile_view"
       job_type: "full-time" | "part-time" | "remote"
       location: "remote" | "in-person" | "hybrid"
       notification_type: "follow" | "review" | "reply" | "mention"

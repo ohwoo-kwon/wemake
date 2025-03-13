@@ -58,7 +58,13 @@ export default function DashboardLayout({ loaderData }: Route.ComponentProps) {
             <SidebarMenu>
               {loaderData.products.map((product) => (
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={
+                      location.pathname ===
+                      `/my/dashboard/products/${product.product_id}`
+                    }
+                  >
                     <Link
                       key={product.product_id}
                       to={`/my/dashboard/products/${product.product_id}`}

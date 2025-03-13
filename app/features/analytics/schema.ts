@@ -2,7 +2,7 @@ import { jsonb, pgEnum, pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export const eventType = pgEnum("event_type", [
   "product_view",
-  "prodcut_visit",
+  "product_visit",
   "profile_view",
 ]);
 

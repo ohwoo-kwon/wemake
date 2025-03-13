@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 
 export const meta: Route.MetaFunction = () => [
   { title: "Product Reviews | wemake" },
-  { name: "description", content: "Read and write prodcut reviews" },
+  { name: "description", content: "Read and write product reviews" },
 ];
 
 export const loader = async ({ params, request }: Route.LoaderArgs) => {

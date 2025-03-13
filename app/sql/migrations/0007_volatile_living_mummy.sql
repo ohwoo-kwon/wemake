@@ -1,1 +1,1 @@
-ALTER TABLE "teams" RENAME COLUMN "prodcut_stage" TO "product_stage";
+ALTER TABLE "teams" RENAME COLUMN "product_stage" TO "product_stage";
