@@ -4,6 +4,7 @@ import { Button, buttonVariants } from "~/common/components/ui/button";
 import type { Route } from "./+types/product-overview-layout";
 import { cn } from "~/lib/utils";
 import { getProductById } from "../queries";
+import { makeSSRClient } from "~/supa-client";
 
 export const meta: Route.MetaFunction = ({ data }) => [
   { title: `${data.product.name} Overview| wemake` },
@@ -12,8 +13,12 @@ export const meta: Route.MetaFunction = ({ data }) => [
 
 export const loader = async ({
   params,
+  request,
 }: Route.LoaderArgs & { params: { prodcutId: string } }) => {
-  const product = await getProductById(params.productId!);
+  const { client } = makeSSRClient(request);
+  const product = await getProductById(client, {
+    productId: params.productId!,
+  });
   return { product };
 };
 
