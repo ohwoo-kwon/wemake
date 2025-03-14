@@ -1,12 +1,17 @@
 import Hero from "~/common/components/hero";
 import type { Route } from "./+types/submit-product-page";
-import { Form } from "react-router";
+import { Form, redirect } from "react-router";
 import InputPair from "~/common/components/input-pair";
 import SelectPair from "~/common/components/select-pair";
 import { Input } from "~/common/components/ui/input";
 import { Label } from "~/common/components/ui/label";
 import { useState, type ChangeEvent } from "react";
 import { Button } from "~/common/components/ui/button";
+import { makeSSRClient } from "~/supa-client";
+import { getLoggedInUserId } from "~/features/users/queries";
+import { z } from "zod";
+import { getCategories } from "../queries";
+import { createProduct } from "../mutations";
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -15,7 +20,58 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-export default function Submit() {
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getLoggedInUserId(client);
+  const categories = await getCategories(client);
+  return { categories };
+};
+
+const formSchema = z.object({
+  name: z.string().min(1),
+  tagline: z.string().min(1),
+  url: z.string().min(1),
+  description: z.string().min(1),
+  howItWorks: z.string().min(1),
+  category: z.coerce.number(),
+  icon: z.instanceof(File).refine((file: File) => {
+    return file.size <= 2097152 && file.type.startsWith("image/");
+  }),
+});
+
+export const action = async ({ request }: Route.ActionArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getLoggedInUserId(client);
+  const formData = await request.formData();
+  const { data, success, error } = formSchema.safeParse(
+    Object.fromEntries(formData)
+  );
+  if (!success) return { formErrors: error.flatten().fieldErrors };
+  const { icon, ...rest } = data;
+  const { data: uploadData, error: uploadError } = await client.storage
+    .from("icons")
+    .upload(`${userId}/${Date.now()}`, icon, {
+      contentType: icon.type,
+      upsert: false,
+    });
+  if (uploadError) return { formErrors: { icon: ["Failed to upload icon"] } };
+  const {
+    data: { publicUrl },
+  } = client.storage.from("icons").getPublicUrl(uploadData.path);
+  const productId = await createProduct(client, {
+    name: rest.name,
+    tagline: rest.tagline,
+    description: rest.description,
+    howItWorks: rest.howItWorks,
+    url: rest.url,
+    iconUrl: publicUrl,
+    categoryId: rest.category,
+    userId,
+  });
+  return redirect(`/products/${productId}`);
+};
+
+export default function Submit({ loaderData }: Route.ComponentProps) {
   const [icon, setIcon] = useState<string>("");
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -30,7 +86,11 @@ export default function Submit() {
         title="Submit Your Product"
         subtitle="Share your product with the world"
       />
-      <Form className="grid grid-cols-2 gap-10 max-w-screen-lg mx-auto">
+      <Form
+        className="grid grid-cols-2 gap-10 max-w-screen-lg mx-auto"
+        method="POST"
+        encType="multipart/form-data"
+      >
         <div className="space-y-5">
           <InputPair
             label="Name"
@@ -68,18 +128,26 @@ export default function Submit() {
             textArea
             placeholder="A detailed description of your product"
           />
+          <InputPair
+            textArea
+            label="How it works"
+            description="A detailed description of how your product howItWorks"
+            id="howItWorks"
+            name="howItWorks"
+            required
+            type="text"
+            placeholder="A detailed description of how your product works"
+          />
           <SelectPair
             label="Category"
             description="The category of your product"
             name="category"
             required
             placeholder="Select a category"
-            options={[
-              { label: "AI", value: "ai" },
-              { label: "Design", value: "design" },
-              { label: "Marketing", value: "marketing" },
-              { label: "Development", value: "development" },
-            ]}
+            options={loaderData.categories.map((category) => ({
+              label: category.name,
+              value: category.category_id.toString(),
+            }))}
           />
           <Button type="submit" className="w-full" size="lg">
             Submit
