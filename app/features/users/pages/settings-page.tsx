@@ -6,10 +6,59 @@ import { useState, type ChangeEvent } from "react";
 import { Label } from "~/common/components/ui/label";
 import { Input } from "~/common/components/ui/input";
 import { Button } from "~/common/components/ui/button";
+import { makeSSRClient } from "~/supa-client";
+import { getLoggedInUserId, getUserById } from "../queries";
+import { z } from "zod";
+import { updateUser } from "../mutations";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "~/common/components/ui/alert";
 
 export const meta: Route.MetaFunction = () => [{ title: "Settings | wemake" }];
 
-export default function SettingsPage() {
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getLoggedInUserId(client);
+  const user = await getUserById(client, { id: userId });
+  return { user };
+};
+
+const formSchema = z.object({
+  name: z.string().min(3),
+  role: z.string(),
+  headline: z.string().optional().default(""),
+  bio: z.string().optional().default(""),
+});
+
+export const action = async ({ request }: Route.ActionArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getLoggedInUserId(client);
+  const formData = await request.formData();
+  const { data, success, error } = formSchema.safeParse(
+    Object.fromEntries(formData)
+  );
+  if (!success) return { formErrors: error.flatten().fieldErrors };
+  await updateUser(client, {
+    id: userId,
+    name: data.name,
+    role: data.role as
+      | "developer"
+      | "designer"
+      | "marketer"
+      | "founder"
+      | "product_manager",
+    headline: data.headline,
+    bio: data.bio,
+  });
+  return { ok: true };
+};
+
+export default function SettingsPage({
+  loaderData,
+  actionData,
+}: Route.ComponentProps) {
   const [avatar, setAvatar] = useState<string>("");
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -22,14 +71,21 @@ export default function SettingsPage() {
     <div className="space-y-20">
       <div className="grid grid-cols-6 gap-40">
         <div className="col-span-4 flex flex-col gap-10">
+          {actionData?.ok ? (
+            <Alert>
+              <AlertTitle>Success</AlertTitle>
+              <AlertDescription>Your profile has been updated</AlertDescription>
+            </Alert>
+          ) : null}
           <h2 className="text-2xl font-semibold">Edit profile</h2>
-          <Form className="flex flex-col gap-5 w-1/2">
+          <Form className="flex flex-col gap-5 w-1/2" method="POST">
             <InputPair
               label="Name"
               description="Your public name"
               placeholder="Lammong"
               id="name"
               name="name"
+              defaultValue={loaderData.user.name}
               required
             />
             <SelectPair
@@ -37,6 +93,7 @@ export default function SettingsPage() {
               description="What role do you do identify the most with"
               name="role"
               placeholder="Select a role"
+              defaultValue={loaderData.user.role}
               options={[
                 { label: "Developer", value: "developer" },
                 { label: "Designer", value: "designer" },
@@ -51,6 +108,7 @@ export default function SettingsPage() {
               placeholder="We are the most worthy family in the world."
               id="headline"
               name="headline"
+              defaultValue={loaderData.user.headline ?? ""}
               required
               textArea
             />
@@ -60,6 +118,7 @@ export default function SettingsPage() {
               placeholder="Be the most worthy family in the world."
               id="bio"
               name="bio"
+              defaultValue={loaderData.user.bio}
               required
               textArea
             />
