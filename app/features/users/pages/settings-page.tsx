@@ -9,7 +9,7 @@ import { Button } from "~/common/components/ui/button";
 import { makeSSRClient } from "~/supa-client";
 import { getLoggedInUserId, getUserById } from "../queries";
 import { z } from "zod";
-import { updateUser } from "../mutations";
+import { updateUser, updateUserAvatar } from "../mutations";
 import {
   Alert,
   AlertDescription,
@@ -36,30 +36,51 @@ export const action = async ({ request }: Route.ActionArgs) => {
   const { client } = makeSSRClient(request);
   const userId = await getLoggedInUserId(client);
   const formData = await request.formData();
-  const { data, success, error } = formSchema.safeParse(
-    Object.fromEntries(formData)
-  );
-  if (!success) return { formErrors: error.flatten().fieldErrors };
-  await updateUser(client, {
-    id: userId,
-    name: data.name,
-    role: data.role as
-      | "developer"
-      | "designer"
-      | "marketer"
-      | "founder"
-      | "product_manager",
-    headline: data.headline,
-    bio: data.bio,
-  });
-  return { ok: true };
+  const avatar = formData.get("avatar");
+  if (avatar && avatar instanceof File) {
+    if (avatar.size <= 2097152 && avatar.type.startsWith("image/")) {
+      const { data, error } = await client.storage
+        .from("avatars")
+        .upload(`${userId}/${Date.now()}`, avatar, {
+          contentType: avatar.type,
+          upsert: false,
+        });
+      if (error) {
+        return { formErrors: { avatar: ["failed to upload avatar"] } };
+      }
+      const {
+        data: { publicUrl },
+      } = client.storage.from("avatars").getPublicUrl(data.path);
+      await updateUserAvatar(client, { id: userId, avatar: publicUrl });
+    } else {
+      return { formErrors: { avatar: ["size error"] } };
+    }
+  } else {
+    const { data, success, error } = formSchema.safeParse(
+      Object.fromEntries(formData)
+    );
+    if (!success) return { formErrors: error.flatten().fieldErrors };
+    await updateUser(client, {
+      id: userId,
+      name: data.name,
+      role: data.role as
+        | "developer"
+        | "designer"
+        | "marketer"
+        | "founder"
+        | "product_manager",
+      headline: data.headline,
+      bio: data.bio,
+    });
+    return { ok: true };
+  }
 };
 
 export default function SettingsPage({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  const [avatar, setAvatar] = useState<string>("");
+  const [avatar, setAvatar] = useState<string | null>(loaderData.user.avatar);
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const file = event.target.files[0];
@@ -125,7 +146,11 @@ export default function SettingsPage({
             <Button className="w-full">Update profile</Button>
           </Form>
         </div>
-        <aside className="col-span-2 p-5 rounded-lg border shadow-sm">
+        <Form
+          className="col-span-2 p-5 rounded-lg border shadow-sm"
+          method="POST"
+          encType="multipart/form-data"
+        >
           <Label className="flex flex-col gap-1">
             Avatar
             <small className="text-muted-foreground">
@@ -143,7 +168,7 @@ export default function SettingsPage({
               className="w-1/2"
               onChange={onChange}
               required
-              name="icon"
+              name="avatar"
             />
             <div className="flex flex-col text-xs text-muted-foreground">
               <span>Recommended size: 128x128px</span>
@@ -152,7 +177,7 @@ export default function SettingsPage({
             </div>
             <Button className="w-full">Update avatar</Button>
           </div>
-        </aside>
+        </Form>
       </div>
     </div>
   );

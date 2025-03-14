@@ -23,3 +23,20 @@ export const updateUser = async (
     .eq("profile_id", id);
   if (error) throw error;
 };
+
+export const updateUserAvatar = async (
+  client: SupabaseClient<Database>,
+  {
+    id,
+    avatar,
+  }: {
+    id: string;
+    avatar: string;
+  }
+) => {
+  const { error } = await client
+    .from("profiles")
+    .update({ avatar })
+    .eq("profile_id", id);
+  if (error) throw error;
+};
