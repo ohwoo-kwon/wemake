@@ -82,18 +82,18 @@ export type Database = {
       follows: {
         Row: {
           created_at: string
-          follower_id: string | null
-          following_id: string | null
+          follower_id: string
+          following_id: string
         }
         Insert: {
           created_at?: string
-          follower_id?: string | null
-          following_id?: string | null
+          follower_id: string
+          following_id: string
         }
         Update: {
           created_at?: string
-          follower_id?: string | null
-          following_id?: string | null
+          follower_id?: string
+          following_id?: string
         }
         Relationships: [
           {
@@ -294,25 +294,25 @@ export type Database = {
           content: string
           created_at: string
           message_id: number
-          message_room_id: number | null
+          message_room_id: number
           seen: boolean
-          sender_id: string | null
+          sender_id: string
         }
         Insert: {
           content: string
           created_at?: string
           message_id?: never
-          message_room_id?: number | null
+          message_room_id: number
           seen?: boolean
-          sender_id?: string | null
+          sender_id: string
         }
         Update: {
           content?: string
           created_at?: string
           message_id?: never
-          message_room_id?: number | null
+          message_room_id?: number
           seen?: boolean
-          sender_id?: string | null
+          sender_id?: string
         }
         Relationships: [
           {
@@ -337,6 +337,7 @@ export type Database = {
           notification_id: number
           post_id: number | null
           product_id: number | null
+          seen: boolean
           source_id: string | null
           target_id: string
           type: Database["public"]["Enums"]["notification_type"]
@@ -346,6 +347,7 @@ export type Database = {
           notification_id?: never
           post_id?: number | null
           product_id?: number | null
+          seen?: boolean
           source_id?: string | null
           target_id: string
           type: Database["public"]["Enums"]["notification_type"]
@@ -355,6 +357,7 @@ export type Database = {
           notification_id?: never
           post_id?: number | null
           product_id?: number | null
+          seen?: boolean
           source_id?: string | null
           target_id?: string
           type?: Database["public"]["Enums"]["notification_type"]
@@ -615,42 +618,42 @@ export type Database = {
       }
       products: {
         Row: {
-          category_id: number | null
+          category_id: number
           created_at: string
           description: string
           how_it_works: string
           icon: string
           name: string
           product_id: number
-          profile_id: string | null
+          profile_id: string
           stats: Json
           tagline: string
           updated_at: string
           url: string
         }
         Insert: {
-          category_id?: number | null
+          category_id: number
           created_at?: string
           description: string
           how_it_works: string
           icon: string
           name: string
           product_id?: never
-          profile_id?: string | null
+          profile_id: string
           stats?: Json
           tagline: string
           updated_at?: string
           url: string
         }
         Update: {
-          category_id?: number | null
+          category_id?: number
           created_at?: string
           description?: string
           how_it_works?: string
           icon?: string
           name?: string
           product_id?: never
-          profile_id?: string | null
+          profile_id?: string
           stats?: Json
           tagline?: string
           updated_at?: string
@@ -925,6 +928,15 @@ export type Database = {
           product_views: number
           product_visits: number
           month: string
+        }[]
+      }
+      get_room: {
+        Args: {
+          from_user_id: string
+          to_user_id: string
+        }
+        Returns: {
+          message_room_id: number
         }[]
       }
       track_event: {

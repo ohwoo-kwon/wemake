@@ -31,7 +31,7 @@ export const getTeamById = async (
     .select(
       `
       *,
-      team_leader:profiles!inner(name,avatar,role)`
+      team_leader:profiles!inner(name,avatar,role,username)`
     )
     .eq("team_id", teamId)
     .single();
