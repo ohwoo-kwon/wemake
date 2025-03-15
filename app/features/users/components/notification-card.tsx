@@ -1,5 +1,6 @@
 import { EyeIcon } from "lucide-react";
-import { Link } from "react-router";
+import type { MouseEvent } from "react";
+import { Link, useFetcher } from "react-router";
 import {
   Avatar,
   AvatarFallback,
@@ -15,6 +16,7 @@ import {
 import { cn } from "~/lib/utils";
 
 interface NotificationCardProps {
+  notificationId: string;
   avatarUrl: string;
   userName: string;
   type: "review" | "follow" | "reply";
@@ -26,6 +28,7 @@ interface NotificationCardProps {
 }
 
 export default function NotificationCard({
+  notificationId,
   avatarUrl,
   userName,
   type,
@@ -35,6 +38,7 @@ export default function NotificationCard({
   payloadId,
   seen,
 }: NotificationCardProps) {
+  const fetcher = useFetcher();
   const getMessage = (type: "review" | "follow" | "reply") => {
     switch (type) {
       case "review":
@@ -45,8 +49,17 @@ export default function NotificationCard({
         return "replied to your post.";
     }
   };
+  const onClickSeen = (e: MouseEvent<HTMLButtonElement>) => {
+    fetcher.submit(null, {
+      method: "POST",
+      action: `/my/notifications/${notificationId}/see`,
+    });
+  };
+  const optimisticSeen = fetcher.state === "idle" ? seen : true;
   return (
-    <Card className={cn("min-w-[450px]", seen ? "" : "bg-yellow-500/60")}>
+    <Card
+      className={cn("min-w-[450px]", optimisticSeen ? "" : "bg-yellow-500/60")}
+    >
       <CardHeader className="flex flex-row gap-5 items-start">
         <Avatar>
           <AvatarFallback>N</AvatarFallback>
@@ -71,8 +84,8 @@ export default function NotificationCard({
         </div>
       </CardHeader>
       <CardFooter className="flex justify-end">
-        {!seen && (
-          <Button variant="outline" size="icon">
+        {!optimisticSeen && (
+          <Button variant="outline" size="icon" onClick={onClickSeen}>
             <EyeIcon className="size-4" />
           </Button>
         )}

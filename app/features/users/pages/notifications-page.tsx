@@ -25,6 +25,7 @@ export default function NotificationsPage({
         {loaderData.notifications.map((notification) => (
           <NotificationCard
             key={notification.notification_id}
+            notificationId={notification.notification_id}
             // @ts-ignore
             avatarUrl={notification.source?.avatar ?? ""}
             // @ts-ignore
